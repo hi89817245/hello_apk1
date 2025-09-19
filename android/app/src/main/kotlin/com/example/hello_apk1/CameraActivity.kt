@@ -882,6 +882,7 @@ class CameraActivity : ComponentActivity() {
                 val allowRetake = (map["pama10"] as? String)?.lowercase() == "y"
                 val voiceEnabled = (map["pama11"] as? String)?.lowercase() != "n"
                 val voiceDelay = (map["pama12"] as? Number)?.toDouble() ?: 0.0
+
                 return CaptureConfigSnapshot(
                     zoomRatio = zoom,
                     stabilizeSeconds = stabilize,
@@ -892,31 +893,6 @@ class CameraActivity : ComponentActivity() {
                     aspectRatio = ratio,
                     overlayScale = overlay,
                     detectionVariance = variance,
-                    allowRetake = allowRetake,
-                    voiceEnabled = voiceEnabled,
-                    voiceDelaySeconds = voiceDelay.coerceIn(0.0, 5.0),
-                )
-            }
-                val ratio = (map["pama7"] as? String)?.ifBlank { "1:1" } ?: "1:1"
-                val overlay = (map["pama8"] as? Number)?.toFloat() ?: 0.78f
-                val variance = (map["pama9"] as? Number)?.toDouble() ?: 1500.0
-                val allowRetake = (map["pama10"] as? String)?.lowercase() == "y"
-                val voiceEnabled = (map["pama11"] as? String)?.lowercase() != "n"
-                val voiceDelay = (map["pama12"] as? Number)?.toDouble() ?: 0.0
-                val voiceEnabled = (map["pama11"] as? String)?.lowercase() != "n"
-                val voiceDelay = (map["pama12"] as? Number)?.toDouble() ?: 0.0
-                return CaptureConfigSnapshot(
-                    zoomRatio = zoom,
-                    stabilizeSeconds = stabilize,
-                    successVoice = voice,
-                    previewSeconds = preview,
-                    storagePath = path,
-                    allowMultiple = allowMultiple,
-                    aspectRatio = ratio,
-                    overlayScale = overlay,
-                    detectionVariance = variance,
-                    voiceEnabled = voiceEnabled,
-                    voiceDelaySeconds = voiceDelay.coerceIn(0.0, 5.0),
                     allowRetake = allowRetake,
                     voiceEnabled = voiceEnabled,
                     voiceDelaySeconds = voiceDelay.coerceIn(0.0, 5.0),
