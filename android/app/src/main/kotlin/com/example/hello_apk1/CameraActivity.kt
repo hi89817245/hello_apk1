@@ -44,6 +44,7 @@ import java.io.FileOutputStream
 import java.io.IOException
 import java.nio.ByteBuffer
 import java.text.SimpleDateFormat
+import java.lang.ref.WeakReference
 import java.util.Date
 import java.util.Locale
 import kotlin.math.max
@@ -52,6 +53,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlin.jvm.JvmStatic
 import android.util.Size
 
 class CameraActivity : ComponentActivity() {
@@ -67,7 +69,18 @@ class CameraActivity : ComponentActivity() {
         const val EXTRA_OVERLAY_SCALE = "extra_overlay_scale"
         const val EXTRA_DETECTION_VARIANCE = "extra_detection_variance"
         const val EXTRA_ALLOW_RETAKE = "extra_allow_retake"
+        const val EXTRA_VOICE_ENABLED = "extra_voice_enabled"
+        const val EXTRA_VOICE_DELAY = "extra_voice_delay"
         private const val BLUR_THRESHOLD = 110.0
+        private var activeInstance: WeakReference<CameraActivity>? = null
+
+        @JvmStatic
+        fun updateActiveConfig(config: Map<*, *>): Boolean {
+            val snapshot = CaptureConfigSnapshot.fromMap(config) ?: return false
+            val activity = activeInstance?.get() ?: return false
+            activity.runOnUiThread { activity.applyConfigUpdate(snapshot) }
+            return true
+        }
     }
 
     private enum class DetectionState { NONE, TARGET, STABLE }
@@ -91,7 +104,7 @@ class CameraActivity : ComponentActivity() {
         if (granted) {
             startCameraSession()
         } else {
-            Toast.makeText(this, "需要相機權限才能拍攝", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "需要相機權限才能使用", Toast.LENGTH_LONG).show()
             finish()
         }
     }
@@ -107,6 +120,8 @@ class CameraActivity : ComponentActivity() {
     private var overlayScale: Float = 0.78f
     private var detectionVariance: Double = 1500.0
     private var allowRetake: Boolean = true
+    private var voiceEnabled: Boolean = true
+    private var voiceDelayMs: Long = 0
 
     private var autoCaptureJob: Job? = null
     private var previewJob: Job? = null
@@ -127,6 +142,7 @@ class CameraActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        activeInstance = WeakReference(this)
         setContentView(R.layout.activity_camera)
         previewView = findViewById(R.id.previewView)
         aimOverlay = findViewById(R.id.aimOverlay)
@@ -152,12 +168,16 @@ class CameraActivity : ComponentActivity() {
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
+        activeInstance = WeakReference(this)
         setIntent(intent)
         applyIntent(intent, fromNewIntent = true)
         restartSession()
     }
 
     override fun onDestroy() {
+        if (activeInstance?.get() === this) {
+            activeInstance = null
+        }
         super.onDestroy()
         autoCaptureJob?.cancel()
         previewJob?.cancel()
@@ -223,13 +243,25 @@ class CameraActivity : ComponentActivity() {
     }
 
     private fun speak(message: String, flush: Boolean = false) {
-        if (message.isBlank()) return
+        if (!voiceEnabled || message.isBlank()) return
         val queueMode = if (flush) TextToSpeech.QUEUE_FLUSH else TextToSpeech.QUEUE_ADD
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            tts?.speak(message, queueMode, null, System.currentTimeMillis().toString())
+        val performSpeak = {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                tts?.speak(message, queueMode, null, System.currentTimeMillis().toString())
+            } else {
+                @Suppress("DEPRECATION")
+                tts?.speak(message, queueMode, null)
+            }
+        }
+        if (voiceDelayMs <= 0L) {
+            performSpeak()
         } else {
-            @Suppress("DEPRECATION")
-            tts?.speak(message, queueMode, null)
+            lifecycleScope.launch {
+                delay(voiceDelayMs)
+                if (voiceEnabled) {
+                    performSpeak()
+                }
+            }
         }
     }
 
@@ -245,12 +277,14 @@ class CameraActivity : ComponentActivity() {
         overlayScale = intent.getFloatExtra(EXTRA_OVERLAY_SCALE, 0.78f).coerceIn(0.4f, 0.95f)
         detectionVariance = intent.getDoubleExtra(EXTRA_DETECTION_VARIANCE, 1500.0).coerceIn(300.0, 4000.0)
         allowRetake = intent.getBooleanExtra(EXTRA_ALLOW_RETAKE, true)
+        voiceEnabled = intent.getBooleanExtra(EXTRA_VOICE_ENABLED, true)
+        voiceDelayMs = (intent.getDoubleExtra(EXTRA_VOICE_DELAY, 0.0).coerceAtLeast(0.0) * 1000).toLong()
 
         aimOverlay.setOverlayScale(overlayScale)
         resetDetectionState(initial = true)
 
         if (requestedUid.isBlank()) {
-            Toast.makeText(this, "缺少賽鴿 UID，無法進行建檔", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "必須提供 UID 才能繼續", Toast.LENGTH_LONG).show()
             finish()
             return
         }
@@ -296,7 +330,7 @@ class CameraActivity : ComponentActivity() {
                 bindUseCases(provider)
             } else {
                 speak("無法啟動相機，請聯絡工作人員。", flush = true)
-                Toast.makeText(this, "無法取得相機服務", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, "無法取得相機畫面", Toast.LENGTH_LONG).show()
                 finish()
             }
         }, ContextCompat.getMainExecutor(this))
@@ -602,7 +636,7 @@ class CameraActivity : ComponentActivity() {
         photoPreview.visibility = View.GONE
         findViewById<View>(R.id.greenFrame)?.visibility = View.GONE
         speak("拍照失敗，系統將重新嘗試。", flush = true)
-        Toast.makeText(this, "拍照失敗：${exception.message}", Toast.LENGTH_LONG).show()
+        Toast.makeText(this, "拍攝失敗：${exception.message}", Toast.LENGTH_LONG).show()
         statusLabel.text = "UID: $requestedUid\n拍照失敗，將重新嘗試"
         resetDetectionState(initial = false)
     }
@@ -791,6 +825,104 @@ class CameraActivity : ComponentActivity() {
             }
         }
         return bestCameraId?.let { it to bestFocal }
+    }
+
+    private fun applyConfigUpdate(config: CaptureConfigSnapshot) {
+        requestedZoomRatio = config.zoomRatio.coerceIn(1f, 10f)
+        stabilizeDurationMs = (config.stabilizeSeconds * 1000).toLong().coerceIn(200, 5000)
+        previewDurationMs = (config.previewSeconds * 1000).toLong().coerceIn(1000, 60000)
+        successVoice = config.successVoice.ifBlank { "完成" }
+        storagePath = config.storagePath.ifBlank { "Pictures/PigeonEyeRecords" }
+        allowMultipleShots = config.allowMultiple
+        requestedAspectRatio = config.aspectRatio.ifBlank { "1:1" }
+        overlayScale = config.overlayScale.coerceIn(0.4f, 0.95f)
+        detectionVariance = config.detectionVariance.coerceIn(300.0, 4000.0)
+        allowRetake = config.allowRetake
+        voiceEnabled = config.voiceEnabled
+        voiceDelayMs = (config.voiceDelaySeconds.coerceAtLeast(0.0) * 1000).toLong()
+
+        aimOverlay.setOverlayScale(overlayScale)
+        adjustZoom(null)
+        if (!isCapturing && !isPreviewing) {
+            aimOverlay.setState(AimOverlayView.AimState.IDLE)
+            findViewById<View>(R.id.greenFrame)?.visibility = View.GONE
+        }
+        val hasTelephoto = selectTelephotoCandidate() != null
+        updateStatusPreparing(hasTelephoto)
+    }
+
+    private data class CaptureConfigSnapshot(
+        val zoomRatio: Float,
+        val stabilizeSeconds: Float,
+        val successVoice: String,
+        val previewSeconds: Float,
+        val storagePath: String,
+        val allowMultiple: Boolean,
+        val aspectRatio: String,
+        val overlayScale: Float,
+        val detectionVariance: Double,
+        val allowRetake: Boolean,
+        val voiceEnabled: Boolean,
+        val voiceDelaySeconds: Double,
+    ) {
+        companion object {
+            fun fromMap(map: Map<*, *>): CaptureConfigSnapshot? {
+                val zoom = (map["pama1"] as? Number)?.toFloat() ?: 3f
+                val stabilize = (map["pama2"] as? Number)?.toFloat() ?: 1.2f
+                val voice = (map["pama3"] as? String)?.ifBlank { "完成" } ?: "完成"
+                val preview = (map["pama4"] as? Number)?.toFloat() ?: 3f
+                val path = (map["pama5"] as? String)?.ifBlank { "Pictures/PigeonEyeRecords" } ?: "Pictures/PigeonEyeRecords"
+                val allowMultiple = when ((map["pama6"] as? String)?.lowercase()) {
+                    "n", "no", "false" -> false
+                    else -> true
+                }
+                val ratio = (map["pama7"] as? String)?.ifBlank { "1:1" } ?: "1:1"
+                val overlay = (map["pama8"] as? Number)?.toFloat() ?: 0.78f
+                val variance = (map["pama9"] as? Number)?.toDouble() ?: 1500.0
+                val allowRetake = (map["pama10"] as? String)?.lowercase() == "y"
+                val voiceEnabled = (map["pama11"] as? String)?.lowercase() != "n"
+                val voiceDelay = (map["pama12"] as? Number)?.toDouble() ?: 0.0
+                return CaptureConfigSnapshot(
+                    zoomRatio = zoom,
+                    stabilizeSeconds = stabilize,
+                    successVoice = voice,
+                    previewSeconds = preview,
+                    storagePath = path,
+                    allowMultiple = allowMultiple,
+                    aspectRatio = ratio,
+                    overlayScale = overlay,
+                    detectionVariance = variance,
+                    allowRetake = allowRetake,
+                    voiceEnabled = voiceEnabled,
+                    voiceDelaySeconds = voiceDelay.coerceIn(0.0, 5.0),
+                )
+            }
+                val ratio = (map["pama7"] as? String)?.ifBlank { "1:1" } ?: "1:1"
+                val overlay = (map["pama8"] as? Number)?.toFloat() ?: 0.78f
+                val variance = (map["pama9"] as? Number)?.toDouble() ?: 1500.0
+                val allowRetake = (map["pama10"] as? String)?.lowercase() == "y"
+                val voiceEnabled = (map["pama11"] as? String)?.lowercase() != "n"
+                val voiceDelay = (map["pama12"] as? Number)?.toDouble() ?: 0.0
+                val voiceEnabled = (map["pama11"] as? String)?.lowercase() != "n"
+                val voiceDelay = (map["pama12"] as? Number)?.toDouble() ?: 0.0
+                return CaptureConfigSnapshot(
+                    zoomRatio = zoom,
+                    stabilizeSeconds = stabilize,
+                    successVoice = voice,
+                    previewSeconds = preview,
+                    storagePath = path,
+                    allowMultiple = allowMultiple,
+                    aspectRatio = ratio,
+                    overlayScale = overlay,
+                    detectionVariance = variance,
+                    voiceEnabled = voiceEnabled,
+                    voiceDelaySeconds = voiceDelay.coerceIn(0.0, 5.0),
+                    allowRetake = allowRetake,
+                    voiceEnabled = voiceEnabled,
+                    voiceDelaySeconds = voiceDelay.coerceIn(0.0, 5.0),
+                )
+            }
+        }
     }
 
     private fun updateStatusPreparing(hasTelephoto: Boolean) {

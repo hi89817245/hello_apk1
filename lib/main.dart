@@ -1,4 +1,4 @@
-﻿
+
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -19,6 +19,8 @@ const Map<String, Object> _defaults = {
   'pama8': 0.78,
   'pama9': 1500.0,
   'pama10': 'y',
+  'pama11': 'y',
+  'pama12': 0.0,
 };
 
 const String _statsTotalKey = 'stats_totalSessions';
@@ -38,6 +40,8 @@ class CaptureSettings {
     required this.overlayScale,
     required this.detectionVariance,
     required this.allowRetake,
+    required this.voiceEnabled,
+    required this.voiceDelaySeconds,
   });
 
   String clubName;
@@ -51,6 +55,8 @@ class CaptureSettings {
   double overlayScale;
   double detectionVariance;
   bool allowRetake;
+  bool voiceEnabled;
+  double voiceDelaySeconds;
 
   factory CaptureSettings.fromPreferences(SharedPreferences prefs) {
     return CaptureSettings(
@@ -65,6 +71,8 @@ class CaptureSettings {
       overlayScale: prefs.getDouble('pama8') ?? _defaults['pama8'] as double,
       detectionVariance: prefs.getDouble('pama9') ?? _defaults['pama9'] as double,
       allowRetake: (prefs.getString('pama10') ?? _defaults['pama10'] as String).toLowerCase() == 'y',
+      voiceEnabled: (prefs.getString('pama11') ?? _defaults['pama11'] as String).toLowerCase() != 'n',
+      voiceDelaySeconds: prefs.getDouble('pama12') ?? _defaults['pama12'] as double,
     );
   }
 
@@ -80,6 +88,8 @@ class CaptureSettings {
     double? overlayScale,
     double? detectionVariance,
     bool? allowRetake,
+    bool? voiceEnabled,
+    double? voiceDelaySeconds,
   }) {
     return CaptureSettings(
       clubName: clubName ?? this.clubName,
@@ -93,6 +103,8 @@ class CaptureSettings {
       overlayScale: overlayScale ?? this.overlayScale,
       detectionVariance: detectionVariance ?? this.detectionVariance,
       allowRetake: allowRetake ?? this.allowRetake,
+      voiceEnabled: voiceEnabled ?? this.voiceEnabled,
+      voiceDelaySeconds: voiceDelaySeconds ?? this.voiceDelaySeconds,
     );
   }
 
@@ -108,6 +120,8 @@ class CaptureSettings {
     await prefs.setDouble('pama8', overlayScale);
     await prefs.setDouble('pama9', detectionVariance);
     await prefs.setString('pama10', allowRetake ? 'y' : 'n');
+    await prefs.setString('pama11', voiceEnabled ? 'y' : 'n');
+    await prefs.setDouble('pama12', voiceDelaySeconds);
   }
 
   Map<String, Object> toNativeConfig() {
@@ -122,6 +136,8 @@ class CaptureSettings {
       'pama8': overlayScale,
       'pama9': detectionVariance,
       'pama10': allowRetake ? 'y' : 'n',
+      'pama11': voiceEnabled ? 'y' : 'n',
+      'pama12': voiceDelaySeconds,
     };
   }
 }
@@ -153,6 +169,18 @@ class CaptureStats {
     uniqueUids: 0,
     lastCaptureAt: null,
   );
+}
+
+Future<void> pushActiveConfig(CaptureSettings settings) async {
+  try {
+    await _channel.invokeMethod('refreshActiveSession', {
+      'config': settings.toNativeConfig(),
+    });
+  } on PlatformException catch (error) {
+    debugPrint('refreshActiveSession failed: \${error.message}');
+  } catch (error) {
+    debugPrint('refreshActiveSession failed: \${error.toString()}');
+  }
 }
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -253,6 +281,7 @@ class _TelephotoHomePageState extends State<TelephotoHomePage> {
     final updated = await showSettingsSheet(context, settings);
     if (updated != null) {
       await _updateSettings(updated);
+      unawaited(pushActiveConfig(updated));
     }
   }
 
@@ -362,7 +391,7 @@ class _TelephotoHomePageState extends State<TelephotoHomePage> {
                             final uid = _manualUidController.text.trim();
                             if (uid.isEmpty) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('請先輸入 UID')),
+        const SnackBar(content: Text('設定已儲存並立即生效。')),
                               );
                               return;
                             }
@@ -497,11 +526,12 @@ class _CaptureWorkflowPageState extends State<CaptureWorkflowPage> {
     final updated = await showSettingsSheet(context, settings);
     if (updated != null) {
       await widget.onSettingsChanged(updated);
+      await pushActiveConfig(updated);
       setState(() {
         _settings = updated;
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('設定已更新，下一次啟動生效。')),
+        const SnackBar(content: Text('設定已儲存並立即生效。')),
       );
     }
   }
@@ -726,7 +756,30 @@ Future<CaptureSettings?> showSettingsSheet(BuildContext context, CaptureSettings
                     },
                   ),
                   SwitchListTile(
-                    title: const Text('pama6 － 同一 UID 允許多張'),
+                    title: const Text('pama11 語音提示'),
+                    value: current.voiceEnabled,
+                    onChanged: (value) {
+                      setState(() {
+                        current = current.copyWith(voiceEnabled: value);
+                      });
+                    },
+                  ),
+                  if (current.voiceEnabled)
+                    _SettingsSlider(
+                      label: 'pama12 語音延遲秒數',
+                      min: 0,
+                      max: 5,
+                      step: 0.5,
+                      value: current.voiceDelaySeconds,
+                      display: '${current.voiceDelaySeconds.toStringAsFixed(1)} 秒',
+                      onChanged: (value) {
+                        setState(() {
+                          current = current.copyWith(voiceDelaySeconds: value);
+                        });
+                      },
+                    ),
+                  SwitchListTile(
+                    title: const Text('pama6 同一 UID 多張拍攝'),
                     value: current.allowMultiple,
                     onChanged: (value) {
                       setState(() {
@@ -735,7 +788,7 @@ Future<CaptureSettings?> showSettingsSheet(BuildContext context, CaptureSettings
                     },
                   ),
                   SwitchListTile(
-                    title: const Text('pama10 － 感應後允許重拍'),
+                    title: const Text('pama10 完成後允許重拍'),
                     value: current.allowRetake,
                     onChanged: (value) {
                       setState(() {

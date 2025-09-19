@@ -14,6 +14,17 @@ class MainActivity : FlutterActivity() {
         methodChannel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, channelName).also { channel ->
             channel.setMethodCallHandler { call, result ->
                 when (call.method) {
+                    "refreshActiveSession" -> {
+                        val args = call.arguments as? Map<*, *>
+                        val config = args?.get("config") as? Map<*, *>
+                        if (config == null) {
+                            result.error("invalid_arguments", "缺少設定參數", null)
+                            return@setMethodCallHandler
+                        }
+                        val applied = CameraActivity.updateActiveConfig(config)
+                        result.success(applied)
+                    }
+
                     "startCaptureSession" -> {
                         val args = call.arguments as? Map<*, *>
                         val uid = args?.get("uid") as? String
@@ -35,6 +46,8 @@ class MainActivity : FlutterActivity() {
                             putExtra(CameraActivity.EXTRA_OVERLAY_SCALE, payload.overlayScale)
                             putExtra(CameraActivity.EXTRA_DETECTION_VARIANCE, payload.detectionVariance)
                             putExtra(CameraActivity.EXTRA_ALLOW_RETAKE, payload.allowRetake)
+                            putExtra(CameraActivity.EXTRA_VOICE_ENABLED, payload.voiceEnabled)
+                            putExtra(CameraActivity.EXTRA_VOICE_DELAY, payload.voiceDelaySeconds.toDouble())
                         }
                         startActivity(intent)
                         result.success(null)
@@ -95,3 +108,4 @@ class MainActivity : FlutterActivity() {
         }
     }
 }
+
