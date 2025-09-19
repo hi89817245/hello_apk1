@@ -1,4 +1,4 @@
-
+ï»¿
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -8,17 +8,17 @@ import 'package:shared_preferences/shared_preferences.dart';
 const MethodChannel _channel = MethodChannel('com.example.hello_apk1/camera');
 
 const Map<String, Object> _defaults = {
-  'pama0': '¤jÂE',
+  'pama0': 'å¤§é´»',
   'pama1': 3.0,
-  'pama2': 0.5,
-  'pama3': '¦n',
-  'pama4': 10.0,
-  'pama5': 'Pictures/ÁÉÂF­i½¤«ØÀÉ',
+  'pama2': 1.2,
+  'pama3': 'å®Œæˆ',
+  'pama4': 3.0,
+  'pama5': 'Pictures/PigeonEyeRecords',
   'pama6': true,
   'pama7': '1:1',
   'pama8': 0.78,
   'pama9': 1500.0,
-  'pama10': 'n',
+  'pama10': 'y',
 };
 
 const String _statsTotalKey = 'stats_totalSessions';
@@ -166,7 +166,7 @@ class TelephotoApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'ÁÉÂF­i½¤«ØÀÉ¨t²Î',
+      title: 'è³½é´¿è™¹è†œå»ºæª”ç³»çµ±',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFFE53935)),
         useMaterial3: true,
@@ -276,10 +276,10 @@ class _TelephotoHomePageState extends State<TelephotoHomePage> {
     final settings = _settings;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('ÁÉÂF­i½¤«ØÀÉ¨t²Î'),
+        title: const Text('è³½é´¿è™¹è†œå»ºæª”ç³»çµ±'),
         actions: [
           IconButton(
-            tooltip: '¨t²Î°Ñ¼Æ',
+            tooltip: 'ç³»çµ±åƒæ•¸',
             onPressed: _openSettings,
             icon: const Icon(Icons.settings),
           ),
@@ -291,11 +291,11 @@ class _TelephotoHomePageState extends State<TelephotoHomePage> {
               padding: const EdgeInsets.all(24),
               child: ListView(
                 children: [
-                  Text('¨t²Î¦WºÙ¡GÁÉÂF­i½¤«ØÀÉ¨t²Î', style: Theme.of(context).textTheme.titleMedium),
-                  Text('ÂF·|¦WºÙ¡G'),
+                  Text('ç³»çµ±åç¨±ï¼šè³½é´¿è™¹è†œå»ºæª”ç³»çµ±', style: Theme.of(context).textTheme.titleMedium),
+                  Text('é´¿æœƒåç¨±ï¼š'),
                   if (_lastUid != null) ...[
                     const SizedBox(height: 12),
-                    Text('³Ìªñ·PÀ³ UID¡G'),
+                    Text('æœ€è¿‘æ„Ÿæ‡‰ UIDï¼š'),
                   ],
                   const SizedBox(height: 16),
                   ValueListenableBuilder<CaptureStats>(
@@ -307,11 +307,11 @@ class _TelephotoHomePageState extends State<TelephotoHomePage> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text('¥»¾÷²Î­p', style: Theme.of(context).textTheme.titleSmall),
+                              Text('æœ¬æ©Ÿçµ±è¨ˆ', style: Theme.of(context).textTheme.titleSmall),
                               const SizedBox(height: 8),
-                              Text('²Ö­p±Ò°Ê«ØÀÉ¡G ¦¸'),
-                              Text('²Ö­p UID ¼Æ¶q¡G'),
-                              Text('³Ìªñ«ØÀÉ¡G'),
+                              Text('ç´¯è¨ˆå•Ÿå‹•å»ºæª”ï¼š æ¬¡'),
+                              Text('ç´¯è¨ˆ UID æ•¸é‡ï¼š'),
+                              Text('æœ€è¿‘å»ºæª”ï¼š'),
                             ],
                           ),
                         ),
@@ -324,11 +324,11 @@ class _TelephotoHomePageState extends State<TelephotoHomePage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: const [
-                          Text('¾Ş§@»¡©ú', style: TextStyle(fontWeight: FontWeight.w600)),
+                          Text('æ“ä½œèªªæ˜', style: TextStyle(fontWeight: FontWeight.w600)),
                           SizedBox(height: 8),
-                          Text('1. ·PÀ³ÁÉÂFÀô UID¡]¥ª°¼Åª¨ú¾¹¡^¡C'),
-                          Text('2. ±NÁÉÂF²´·ú¸m©ó¿Ã¹õ¤¤¥¡ºË·Ç®Ø¤º¡A¨ÌÃC¦â´£¥Ü¶i¦æ¡G¦Ç¥Õ¡÷¥¼°»´ú¡Bª÷¦â¡÷½Ğ«O«ùÃ­©w¡Bºñ¦â¡÷·Ç³Æ©çÄá¡C'),
-                          Text('3. ©çÄá§¹¦¨«á¨Ì»y­µ©Î«ü¥Ü½T»{¡A­Y»İ­n­«©ç½Ğ¨Ì³]©w¬yµ{¾Ş§@¡C'),
+                          Text('1. æ„Ÿæ‡‰è³½é´¿ç’° UIDï¼ˆå·¦å´è®€å–å™¨ï¼‰ã€‚'),
+                          Text('2. å°‡è³½é´¿çœ¼ç›ç½®æ–¼è¢å¹•ä¸­å¤®ç„æº–æ¡†å…§ï¼Œä¾é¡è‰²æç¤ºé€²è¡Œï¼šç°ç™½â†’æœªåµæ¸¬ã€é‡‘è‰²â†’è«‹ä¿æŒç©©å®šã€ç¶ è‰²â†’æº–å‚™æ‹æ”ã€‚'),
+                          Text('3. æ‹æ”å®Œæˆå¾Œä¾èªéŸ³æˆ–æŒ‡ç¤ºç¢ºèªï¼Œè‹¥éœ€è¦é‡æ‹è«‹ä¾è¨­å®šæµç¨‹æ“ä½œã€‚'),
                         ],
                       ),
                     ),
@@ -339,18 +339,18 @@ class _TelephotoHomePageState extends State<TelephotoHomePage> {
                     icon: const Icon(Icons.play_circle),
                     label: const Padding(
                       padding: EdgeInsets.symmetric(vertical: 12),
-                      child: Text('¶}©l§@·~¬yµ{'),
+                      child: Text('é–‹å§‹ä½œæ¥­æµç¨‹'),
                     ),
                   ),
                   const SizedBox(height: 24),
                   ExpansionTile(
-                    title: const Text('¤uµ{´ú¸Õ¼Ò¦¡'),
-                    subtitle: const Text('¶È¨Ñ°£¿ù©ÎµL HID ¸Ë¸m®É¨Ï¥Î'),
+                    title: const Text('å·¥ç¨‹æ¸¬è©¦æ¨¡å¼'),
+                    subtitle: const Text('åƒ…ä¾›é™¤éŒ¯æˆ–ç„¡ HID è£ç½®æ™‚ä½¿ç”¨'),
                     children: [
                       TextField(
                         controller: _manualUidController,
                         decoration: const InputDecoration(
-                          labelText: '¤â°Ê¿é¤JÁÉÂF UID',
+                          labelText: 'æ‰‹å‹•è¼¸å…¥è³½é´¿ UID',
                           border: OutlineInputBorder(),
                         ),
                       ),
@@ -362,14 +362,14 @@ class _TelephotoHomePageState extends State<TelephotoHomePage> {
                             final uid = _manualUidController.text.trim();
                             if (uid.isEmpty) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('½Ğ¥ı¿é¤J UID')),
+                                const SnackBar(content: Text('è«‹å…ˆè¼¸å…¥ UID')),
                               );
                               return;
                             }
                             _startWorkflow(initialUid: uid);
                           },
                           icon: const Icon(Icons.warning_amber),
-                          label: const Text('¤â°Ê±Ò°Ê´ú¸Õ¬yµ{'),
+                          label: const Text('æ‰‹å‹•å•Ÿå‹•æ¸¬è©¦æµç¨‹'),
                         ),
                       ),
                       const SizedBox(height: 12),
@@ -406,7 +406,7 @@ class _CaptureWorkflowPageState extends State<CaptureWorkflowPage> {
   final StringBuffer _hidBuffer = StringBuffer();
   CaptureSettings? _settings;
   String? _currentUid;
-  String _statusMessage = 'µ¥«İ·PÀ³ÁÉÂFÀô UID¡K';
+  String _statusMessage = 'ç­‰å¾…æ„Ÿæ‡‰è³½é´¿ç’° UIDâ€¦';
   bool _invokingSession = false;
   Timer? _elapsedTimer;
   Duration _elapsed = Duration.zero;
@@ -444,7 +444,7 @@ class _CaptureWorkflowPageState extends State<CaptureWorkflowPage> {
     if (_invokingSession) return;
     setState(() {
       _currentUid = uid;
-      _statusMessage = 'UID¡G\n½Ğ¨Ì·Ó¿Ã¹õ»P»y­µ«ü¥ÜºË·Ç­i½¤';
+      _statusMessage = 'UIDï¼š\nè«‹ä¾ç…§è¢å¹•èˆ‡èªéŸ³æŒ‡ç¤ºç„æº–è™¹è†œ';
       _invokingSession = true;
     });
     await widget.onRecordSession(uid);
@@ -456,11 +456,11 @@ class _CaptureWorkflowPageState extends State<CaptureWorkflowPage> {
         'config': config,
       });
       setState(() {
-        _statusMessage = 'UID¡G\nµ¥«İ­i½¤¹ï·Ç¡K½Ğ¸òÀHÃC¦â®Ø«ü¥Ü';
+        _statusMessage = 'UIDï¼š\nç­‰å¾…è™¹è†œå°æº–â€¦è«‹è·Ÿéš¨é¡è‰²æ¡†æŒ‡ç¤º';
       });
     } on PlatformException catch (error) {
       setState(() {
-        _statusMessage = '±Ò°Ê¬Û¾÷¥¢±Ñ¡G';
+        _statusMessage = 'å•Ÿå‹•ç›¸æ©Ÿå¤±æ•—ï¼š';
       });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(_statusMessage)),
@@ -501,7 +501,7 @@ class _CaptureWorkflowPageState extends State<CaptureWorkflowPage> {
         _settings = updated;
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('³]©w¤w§ó·s¡A¤U¤@¦¸±Ò°Ê¥Í®Ä¡C')),
+        const SnackBar(content: Text('è¨­å®šå·²æ›´æ–°ï¼Œä¸‹ä¸€æ¬¡å•Ÿå‹•ç”Ÿæ•ˆã€‚')),
       );
     }
   }
@@ -513,10 +513,10 @@ class _CaptureWorkflowPageState extends State<CaptureWorkflowPage> {
       onKey: _handleRawKeyEvent,
       child: Scaffold(
         appBar: AppBar(
-          title: Text(_currentUid == null ? 'µ¥«İ·PÀ³' : 'UID¡G'),
+          title: Text(_currentUid == null ? 'ç­‰å¾…æ„Ÿæ‡‰' : 'UIDï¼š'),
           actions: [
             IconButton(
-              tooltip: '³]©w',
+              tooltip: 'è¨­å®š',
               onPressed: _openSettings,
               icon: const Icon(Icons.settings_suggest),
             ),
@@ -532,11 +532,11 @@ class _CaptureWorkflowPageState extends State<CaptureWorkflowPage> {
                 builder: (_, stats, __) {
                   return Row(
                     children: [
-                      _InfoChip(label: '²Ö­p«ØÀÉ', value: ''),
+                      _InfoChip(label: 'ç´¯è¨ˆå»ºæª”', value: ''),
                       const SizedBox(width: 12),
-                      _InfoChip(label: '°ß¤@ UID', value: ''),
+                      _InfoChip(label: 'å”¯ä¸€ UID', value: ''),
                       const SizedBox(width: 12),
-                      _InfoChip(label: '¤w¥Î®É¶¡', value: _formatDuration(_elapsed)),
+                      _InfoChip(label: 'å·²ç”¨æ™‚é–“', value: _formatDuration(_elapsed)),
                     ],
                   );
                 },
@@ -548,7 +548,7 @@ class _CaptureWorkflowPageState extends State<CaptureWorkflowPage> {
               ),
               const SizedBox(height: 16),
               Text(
-                '­Y»y­µ´£¥Ü¶W¹L 30 ¬í¤´µLªk§¹¦¨¡A¨t²Î·|¦Û°Ê½Ğ§@·~¤H­û¨ó§U¡C',
+                'è‹¥èªéŸ³æç¤ºè¶…é 30 ç§’ä»ç„¡æ³•å®Œæˆï¼Œç³»çµ±æœƒè‡ªå‹•è«‹ä½œæ¥­äººå“¡å”åŠ©ã€‚',
                 style: theme.textTheme.bodySmall,
               ),
               const Spacer(),
@@ -561,7 +561,7 @@ class _CaptureWorkflowPageState extends State<CaptureWorkflowPage> {
                           : () {
                               setState(() {
                                 _currentUid = null;
-                                _statusMessage = 'µ¥«İ·PÀ³ÁÉÂFÀô UID¡K';
+                                _statusMessage = 'ç­‰å¾…æ„Ÿæ‡‰è³½é´¿ç’° UIDâ€¦';
                                 _elapsedTimer?.cancel();
                                 _elapsed = Duration.zero;
                               });
@@ -569,7 +569,7 @@ class _CaptureWorkflowPageState extends State<CaptureWorkflowPage> {
                       icon: const Icon(Icons.restart_alt),
                       label: const Padding(
                         padding: EdgeInsets.symmetric(vertical: 12),
-                        child: Text('µ¥«İ¤U¤@­Ó UID'),
+                        child: Text('ç­‰å¾…ä¸‹ä¸€å€‹ UID'),
                       ),
                     ),
                   ),
@@ -580,7 +580,7 @@ class _CaptureWorkflowPageState extends State<CaptureWorkflowPage> {
                       icon: const Icon(Icons.logout),
                       label: const Padding(
                         padding: EdgeInsets.symmetric(vertical: 12),
-                        child: Text('µ²§ô¨Ãªğ¦^­º­¶'),
+                        child: Text('çµæŸä¸¦è¿”å›é¦–é '),
                       ),
                     ),
                   ),
@@ -645,12 +645,12 @@ Future<CaptureSettings?> showSettingsSheet(BuildContext context, CaptureSettings
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('¨t²Î°Ñ¼Æ³]©w', style: Theme.of(context).textTheme.titleLarge),
+                  Text('ç³»çµ±åƒæ•¸è¨­å®š', style: Theme.of(context).textTheme.titleLarge),
                   const SizedBox(height: 16),
                   TextField(
                     controller: clubController,
                     decoration: const InputDecoration(
-                      labelText: 'pama0 ¡Ğ ÂF·|¦WºÙ',
+                      labelText: 'pama0 ï¼ é´¿æœƒåç¨±',
                       border: OutlineInputBorder(),
                     ),
                     onChanged: (value) {
@@ -661,7 +661,7 @@ Future<CaptureSettings?> showSettingsSheet(BuildContext context, CaptureSettings
                   ),
                   const SizedBox(height: 16),
                   _SettingsSlider(
-                    label: 'pama1 ¡Ğ ÃèÀY¹w³]­¿²v',
+                    label: 'pama1 ï¼ é¡é ­é è¨­å€ç‡',
                     min: 1,
                     max: 10,
                     step: 0.1,
@@ -674,12 +674,12 @@ Future<CaptureSettings?> showSettingsSheet(BuildContext context, CaptureSettings
                     },
                   ),
                   _SettingsSlider(
-                    label: 'pama2 ¡Ğ Ã­©w§P©w¬í¼Æ',
+                    label: 'pama2 ï¼ ç©©å®šåˆ¤å®šç§’æ•¸',
                     min: 0.2,
                     max: 2.0,
                     step: 0.1,
                     value: current.stabilizeSeconds,
-                    display: '${current.stabilizeSeconds.toStringAsFixed(1)} ¬í',
+                    display: '${current.stabilizeSeconds.toStringAsFixed(1)} ç§’',
                     onChanged: (value) {
                       setState(() {
                         current = current.copyWith(stabilizeSeconds: value);
@@ -687,12 +687,12 @@ Future<CaptureSettings?> showSettingsSheet(BuildContext context, CaptureSettings
                     },
                   ),
                   _SettingsSlider(
-                    label: 'pama4 ¡Ğ ©çÄá«á¹wÄı¬í¼Æ',
+                    label: 'pama4 ï¼ æ‹æ”å¾Œé è¦½ç§’æ•¸',
                     min: 3,
                     max: 30,
                     step: 1,
                     value: current.previewSeconds,
-                    display: '${current.previewSeconds.toStringAsFixed(0)} ¬í',
+                    display: '${current.previewSeconds.toStringAsFixed(0)} ç§’',
                     onChanged: (value) {
                       setState(() {
                         current = current.copyWith(previewSeconds: value);
@@ -700,7 +700,7 @@ Future<CaptureSettings?> showSettingsSheet(BuildContext context, CaptureSettings
                     },
                   ),
                   _SettingsSlider(
-                    label: 'pama8 ¡Ğ ºË·Ç®Ø¤Ø¤o¦û¤ñ',
+                    label: 'pama8 ï¼ ç„æº–æ¡†å°ºå¯¸ä½”æ¯”',
                     min: 0.4,
                     max: 0.95,
                     step: 0.01,
@@ -713,7 +713,7 @@ Future<CaptureSettings?> showSettingsSheet(BuildContext context, CaptureSettings
                     },
                   ),
                   _SettingsSlider(
-                    label: 'pama9 ¡Ğ ­i½¤°»´ú±Ó·P«×',
+                    label: 'pama9 ï¼ è™¹è†œåµæ¸¬æ•æ„Ÿåº¦',
                     min: 300,
                     max: 4000,
                     step: 50,
@@ -726,7 +726,7 @@ Future<CaptureSettings?> showSettingsSheet(BuildContext context, CaptureSettings
                     },
                   ),
                   SwitchListTile(
-                    title: const Text('pama6 ¡Ğ ¦P¤@ UID ¤¹³\¦h±i'),
+                    title: const Text('pama6 ï¼ åŒä¸€ UID å…è¨±å¤šå¼µ'),
                     value: current.allowMultiple,
                     onChanged: (value) {
                       setState(() {
@@ -735,7 +735,7 @@ Future<CaptureSettings?> showSettingsSheet(BuildContext context, CaptureSettings
                     },
                   ),
                   SwitchListTile(
-                    title: const Text('pama10 ¡Ğ ·PÀ³«á¤¹³\­«©ç'),
+                    title: const Text('pama10 ï¼ æ„Ÿæ‡‰å¾Œå…è¨±é‡æ‹'),
                     value: current.allowRetake,
                     onChanged: (value) {
                       setState(() {
@@ -746,13 +746,13 @@ Future<CaptureSettings?> showSettingsSheet(BuildContext context, CaptureSettings
                   DropdownButtonFormField<String>(
                     value: current.aspectRatio,
                     decoration: const InputDecoration(
-                      labelText: 'pama7 ¡Ğ ¹Ï¤ù¤ñ¨Ò',
+                      labelText: 'pama7 ï¼ åœ–ç‰‡æ¯”ä¾‹',
                       border: OutlineInputBorder(),
                     ),
                     items: const [
-                      DropdownMenuItem(value: '1:1', child: Text('1:1 ¥¿¤è§Î')),
-                      DropdownMenuItem(value: '4:3', child: Text('4:3 ¼Ğ·Ç')),
-                      DropdownMenuItem(value: '16:9', child: Text('16:9 ¼e')),
+                      DropdownMenuItem(value: '1:1', child: Text('1:1 æ­£æ–¹å½¢')),
+                      DropdownMenuItem(value: '4:3', child: Text('4:3 æ¨™æº–')),
+                      DropdownMenuItem(value: '16:9', child: Text('16:9 å¯¬')),
                     ],
                     onChanged: (value) {
                       if (value == null) return;
@@ -765,7 +765,7 @@ Future<CaptureSettings?> showSettingsSheet(BuildContext context, CaptureSettings
                   TextField(
                     controller: voiceController,
                     decoration: const InputDecoration(
-                      labelText: 'pama3 ¡Ğ ¦¨¥\»y­µ¤º®e',
+                      labelText: 'pama3 ï¼ æˆåŠŸèªéŸ³å…§å®¹',
                       border: OutlineInputBorder(),
                     ),
                     onChanged: (value) {
@@ -776,7 +776,7 @@ Future<CaptureSettings?> showSettingsSheet(BuildContext context, CaptureSettings
                   TextField(
                     controller: pathController,
                     decoration: const InputDecoration(
-                      labelText: 'pama5 ¡Ğ ¹Ï¤ùÀx¦s¸ô®|',
+                      labelText: 'pama5 ï¼ åœ–ç‰‡å„²å­˜è·¯å¾‘',
                       border: OutlineInputBorder(),
                     ),
                     onChanged: (value) {
@@ -789,14 +789,14 @@ Future<CaptureSettings?> showSettingsSheet(BuildContext context, CaptureSettings
                       Expanded(
                         child: TextButton(
                           onPressed: () => Navigator.of(context).pop(),
-                          child: const Text('¨ú®ø'),
+                          child: const Text('å–æ¶ˆ'),
                         ),
                       ),
                       const SizedBox(width: 16),
                       Expanded(
                         child: FilledButton(
                           onPressed: () => Navigator.of(context).pop(current),
-                          child: const Text('Àx¦s³]©w'),
+                          child: const Text('å„²å­˜è¨­å®š'),
                         ),
                       ),
                     ],
@@ -868,7 +868,7 @@ class _SettingsSlider extends StatelessWidget {
 
 String _formatDateTime(DateTime? value) {
   if (value == null) {
-    return '©|¥¼¬ö¿ı';
+    return 'å°šæœªç´€éŒ„';
   }
   final month = value.month.toString().padLeft(2, '0');
   final day = value.day.toString().padLeft(2, '0');

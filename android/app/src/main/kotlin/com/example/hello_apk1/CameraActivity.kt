@@ -98,15 +98,15 @@ class CameraActivity : ComponentActivity() {
 
     private var requestedUid: String = ""
     private var requestedZoomRatio: Float = 3f
-    private var stabilizeDurationMs: Long = 500
-    private var previewDurationMs: Long = 10_000
-    private var successVoice: String = "好"
-    private var storagePath: String = "Pictures/賽鴿虹膜建檔"
+    private var stabilizeDurationMs: Long = 1_200
+    private var previewDurationMs: Long = 3_000
+    private var successVoice: String = "完成"
+    private var storagePath: String = "Pictures/PigeonEyeRecords"
     private var allowMultipleShots: Boolean = true
     private var requestedAspectRatio: String = "1:1"
     private var overlayScale: Float = 0.78f
     private var detectionVariance: Double = 1500.0
-    private var allowRetake: Boolean = false
+    private var allowRetake: Boolean = true
 
     private var autoCaptureJob: Job? = null
     private var previewJob: Job? = null
@@ -236,15 +236,15 @@ class CameraActivity : ComponentActivity() {
     private fun applyIntent(intent: Intent, fromNewIntent: Boolean = false) {
         requestedUid = intent.getStringExtra(EXTRA_UID)?.trim().orEmpty()
         requestedZoomRatio = intent.getFloatExtra(EXTRA_ZOOM_RATIO, 3f).coerceIn(1f, 10f)
-        stabilizeDurationMs = (intent.getFloatExtra(EXTRA_STABILIZE_SECONDS, 0.5f) * 1000).toLong().coerceIn(200, 5000)
-        previewDurationMs = (intent.getFloatExtra(EXTRA_PREVIEW_SECONDS, 10f) * 1000).toLong().coerceIn(1000, 60000)
-        successVoice = intent.getStringExtra(EXTRA_SUCCESS_VOICE).orEmpty().ifBlank { "好" }
-        storagePath = intent.getStringExtra(EXTRA_STORAGE_PATH).orEmpty().ifBlank { "Pictures/賽鴿虹膜建檔" }
+        stabilizeDurationMs = (intent.getFloatExtra(EXTRA_STABILIZE_SECONDS, 1.2f) * 1000).toLong().coerceIn(200, 5000)
+        previewDurationMs = (intent.getFloatExtra(EXTRA_PREVIEW_SECONDS, 3f) * 1000).toLong().coerceIn(1000, 60000)
+        successVoice = intent.getStringExtra(EXTRA_SUCCESS_VOICE).orEmpty().ifBlank { "完成" }
+        storagePath = intent.getStringExtra(EXTRA_STORAGE_PATH).orEmpty().ifBlank { "Pictures/PigeonEyeRecords" }
         allowMultipleShots = intent.getBooleanExtra(EXTRA_ALLOW_MULTIPLE, true)
         requestedAspectRatio = intent.getStringExtra(EXTRA_ASPECT_RATIO).orEmpty().ifBlank { "1:1" }
         overlayScale = intent.getFloatExtra(EXTRA_OVERLAY_SCALE, 0.78f).coerceIn(0.4f, 0.95f)
         detectionVariance = intent.getDoubleExtra(EXTRA_DETECTION_VARIANCE, 1500.0).coerceIn(300.0, 4000.0)
-        allowRetake = intent.getBooleanExtra(EXTRA_ALLOW_RETAKE, false)
+        allowRetake = intent.getBooleanExtra(EXTRA_ALLOW_RETAKE, true)
 
         aimOverlay.setOverlayScale(overlayScale)
         resetDetectionState(initial = true)
@@ -266,7 +266,8 @@ class CameraActivity : ComponentActivity() {
         failureCount = 0
         assistanceNotified = false
         lastSpokenState = null
-        aimOverlay.visibility = View.VISIBLE\n        photoPreview.visibility = View.GONE
+        aimOverlay.visibility = View.VISIBLE
+        photoPreview.visibility = View.GONE
         aimOverlay.setState(AimOverlayView.AimState.IDLE)
         findViewById<View>(R.id.greenFrame)?.visibility = View.GONE
         if (initial) {
@@ -329,6 +330,29 @@ class CameraActivity : ComponentActivity() {
         enableTorch(true)
         adjustZoom(teleCandidate)
         updateStatusPreparing(teleCandidate != null)
+    }
+
+    private fun adjustZoom(teleCandidate: Pair<String, Float>?) {
+        val camera = activeCamera ?: return
+        val zoomStateLiveData = camera.cameraInfo.zoomState
+        val baseDesired = requestedZoomRatio.coerceAtLeast(1f)
+        val desiredRatio = teleCandidate?.let { baseDesired } ?: baseDesired
+        fun applyZoom(state: androidx.camera.core.ZoomState) {
+            val bounded = desiredRatio.coerceIn(state.minZoomRatio, state.maxZoomRatio)
+            camera.cameraControl.setZoomRatio(bounded)
+        }
+        val currentState = zoomStateLiveData.value
+        if (currentState != null) {
+            applyZoom(currentState)
+        } else {
+            val observer = object : androidx.lifecycle.Observer<androidx.camera.core.ZoomState> {
+                override fun onChanged(state: androidx.camera.core.ZoomState) {
+                    applyZoom(state)
+                    zoomStateLiveData.removeObserver(this)
+                }
+            }
+            zoomStateLiveData.observe(this, observer)
+        }
     }
 
     private fun createImageCapture(): ImageCapture {
@@ -535,7 +559,7 @@ class CameraActivity : ComponentActivity() {
         hasCapturedAtLeastOnce = true
         isCapturing = false
         isPreviewing = true
-        captureButton.isEnabled = allowMultipleShots
+        captureButton.isEnabled = allowMultipleShots || allowRetake
         aimOverlay.visibility = View.GONE
         findViewById<View>(R.id.greenFrame)?.visibility = View.GONE
         statusLabel.text = "UID: $requestedUid\n已完成拍攝：$fileName"
@@ -545,7 +569,7 @@ class CameraActivity : ComponentActivity() {
         } else {
             photoPreview.visibility = View.GONE
         }
-        speak(successVoice.ifBlank { "好" }, flush = true)
+        speak(successVoice.ifBlank { "完成" }, flush = true)
         if (blurScore < BLUR_THRESHOLD) {
             speak("影像可能偏模糊，若需要請重新拍攝。", flush = false)
         }
@@ -561,8 +585,8 @@ class CameraActivity : ComponentActivity() {
             statusLabel.text = "UID: $requestedUid\n預覽結束"
             photoPreview.visibility = View.GONE
             isPreviewing = false
-            captureButton.isEnabled = true
-            if (allowRetake && allowMultipleShots) {
+            captureButton.isEnabled = allowMultipleShots || allowRetake
+            if (allowMultipleShots || allowRetake) {
                 resetDetectionState(initial = false)
             } else {
                 finish()
@@ -574,7 +598,8 @@ class CameraActivity : ComponentActivity() {
         isCapturing = false
         isPreviewing = false
         captureButton.isEnabled = true
-        aimOverlay.visibility = View.VISIBLE\n        photoPreview.visibility = View.GONE
+        aimOverlay.visibility = View.VISIBLE
+        photoPreview.visibility = View.GONE
         findViewById<View>(R.id.greenFrame)?.visibility = View.GONE
         speak("拍照失敗，系統將重新嘗試。", flush = true)
         Toast.makeText(this, "拍照失敗：${exception.message}", Toast.LENGTH_LONG).show()
@@ -583,7 +608,7 @@ class CameraActivity : ComponentActivity() {
     }
 
     private fun resolveStoragePath(): String {
-        val base = storagePath.ifBlank { "Pictures/賽鴿虹膜建檔" }
+        val base = storagePath.ifBlank { "Pictures/PigeonEyeRecords" }
         val normalized = if (base.startsWith("Pictures")) base else "Pictures/$base"
         return if (normalized.contains("%UID%", ignoreCase = true)) {
             normalized.replace("%UID%", requestedUid, ignoreCase = true)
@@ -696,7 +721,6 @@ class CameraActivity : ComponentActivity() {
             val r = (color shr 16) and 0xFF
             val g = (color shr 8) and 0xFF
             val b = color and 0xFF
-            gray[i] = ((0.299f * r) + (0
             gray[i] = ((0.299f * r) + (0.587f * g) + (0.114f * b)).toInt()
         }
         var sum = 0.0
@@ -766,22 +790,15 @@ class CameraActivity : ComponentActivity() {
                 bestCameraId = cameraId
             }
         }
-        if (bestCameraId == null || bestFocal < 40f) {
-            return null
-        }
-        return bestCameraId!! to bestFocal
+        return bestCameraId?.let { it to bestFocal }
     }
 
     private fun updateStatusPreparing(hasTelephoto: Boolean) {
         val zoomDesc = String.format(Locale.TAIWAN, "%.1fx", requestedZoomRatio)
-        statusLabel.text = if (hasTelephoto) {
-            "UID: $requestedUid\n使用長焦鏡頭，目標倍率 $zoomDesc"
-        } else {
-            "UID: $requestedUid\n未偵測到長焦鏡頭，改用 $zoomDesc 數位放大"
-        }
+        statusLabel.text = "UID: $requestedUid\n倍率已設定為 $zoomDesc"
     }
 
-    private fun ImageProxy.toBitmap(): Bitmap? {
+private fun ImageProxy.toBitmap(): Bitmap? {
         val buffer: ByteBuffer = planes.firstOrNull()?.buffer ?: return null
         val bytes = ByteArray(buffer.remaining())
         buffer.get(bytes)
@@ -797,3 +814,8 @@ class CameraActivity : ComponentActivity() {
         return Bitmap.createBitmap(this, 0, 0, width, height, matrix, true)
     }
 }
+
+
+
+
+

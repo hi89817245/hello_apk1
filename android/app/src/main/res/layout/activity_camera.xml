@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+ï»¿<?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
@@ -51,7 +51,7 @@
         android:paddingEnd="16dp"
         android:paddingTop="8dp"
         android:paddingBottom="8dp"
-        android:text="ªì©l¤Æ¬Û¾÷..."
+        android:text="çž„æº–é´¿çœ¼ä¸­..."
         android:textColor="@android:color/white"
         android:textSize="16sp"
         app:layout_constraintTop_toTopOf="parent"
@@ -63,7 +63,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="32dp"
-        android:contentDescription="¥ß§Y©çÄá"
+        android:contentDescription="æ‹ç…§"
         android:src="@android:drawable/ic_menu_camera"
         app:backgroundTint="#E53935"
         app:tint="@android:color/white"
@@ -77,10 +77,11 @@
         android:layout_height="48dp"
         android:layout_margin="24dp"
         android:background="@android:color/transparent"
-        android:contentDescription="Ãö³¬"
+        android:contentDescription="é—œé–‰"
         android:src="@android:drawable/ic_menu_close_clear_cancel"
         android:tint="@android:color/white"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
+

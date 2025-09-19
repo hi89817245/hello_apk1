@@ -1,4 +1,4 @@
-package com.example.hello_apk1
+Ôªøpackage com.example.hello_apk1
 
 import android.content.Intent
 import io.flutter.embedding.android.FlutterActivity
@@ -19,7 +19,7 @@ class MainActivity : FlutterActivity() {
                         val uid = args?.get("uid") as? String
                         val config = args?.get("config") as? Map<*, *>
                         if (uid.isNullOrBlank() || config == null) {
-                            result.error("invalid_arguments", "Ø §÷•≤≠n∞—º∆", null)
+                            result.error("invalid_arguments", "Áº∫Â∞ëÂøÖË¶ÅÂèÉÊï∏", null)
                             return@setMethodCallHandler
                         }
                         val payload = CaptureConfig.fromMap(config)
@@ -67,10 +67,10 @@ class MainActivity : FlutterActivity() {
         companion object {
             fun fromMap(map: Map<*, *>): CaptureConfig {
                 val zoom = (map["pama1"] as? Number)?.toFloat() ?: 3f
-                val stabilize = (map["pama2"] as? Number)?.toFloat() ?: 0.5f
-                val voice = (map["pama3"] as? String)?.ifBlank { "¶n" } ?: "¶n"
-                val preview = (map["pama4"] as? Number)?.toFloat() ?: 10f
-                val path = (map["pama5"] as? String)?.ifBlank { "Pictures/¡…¬F≠iΩ§´ÿ¿…" } ?: "Pictures/¡…¬F≠iΩ§´ÿ¿…"
+                val stabilize = (map["pama2"] as? Number)?.toFloat() ?: 1.2f
+                val voice = (map["pama3"] as? String)?.ifBlank { "ÂÆåÊàê" } ?: "ÂÆåÊàê"
+                val preview = (map["pama4"] as? Number)?.toFloat() ?: 3f
+                val path = (map["pama5"] as? String)?.ifBlank { "Pictures/PigeonEyeRecords" } ?: "Pictures/PigeonEyeRecords"
                 val allowMultiple = when ((map["pama6"] as? String)?.lowercase()) {
                     "n", "no", "false" -> false
                     else -> true
